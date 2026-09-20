@@ -23,10 +23,21 @@ export interface ConversationDetail {
   messages: Message[];
 }
 
+export interface ConversationSummary {
+  id: number;
+  status: string;
+  created_at: string;
+  preview: string | null;
+}
+
 export function createConversation(): Promise<Conversation> {
   return apiFetch<Conversation>("/conversations", { method: "POST" });
 }
 
 export function getConversation(id: number): Promise<ConversationDetail> {
   return apiFetch<ConversationDetail>(`/conversations/${id}`);
+}
+
+export function listConversations(): Promise<ConversationSummary[]> {
+  return apiFetch<ConversationSummary[]>("/conversations");
 }

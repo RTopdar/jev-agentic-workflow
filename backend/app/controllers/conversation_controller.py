@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -16,11 +18,34 @@ class ConversationDetail(BaseModel):
     messages: list[Message]
 
 
+class ConversationSummary(BaseModel):
+    id: int
+    status: str
+    created_at: datetime
+    preview: str | None
+
+
 @router.post("", response_model=Conversation, status_code=201)
 async def create_conversation(
     session: AsyncSession = Depends(get_session),
 ) -> Conversation:
     return await conversation_service.create_conversation(session)
+
+
+@router.get("", response_model=list[ConversationSummary])
+async def list_conversations(
+    session: AsyncSession = Depends(get_session),
+) -> list[ConversationSummary]:
+    rows = await conversation_service.list_conversations(session)
+    return [
+        ConversationSummary(
+            id=conversation.id,
+            status=conversation.status,
+            created_at=conversation.created_at,
+            preview=preview,
+        )
+        for conversation, preview in rows
+    ]
 
 
 @router.get("/{conversation_id}", response_model=ConversationDetail)

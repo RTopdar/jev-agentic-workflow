@@ -1,23 +1,74 @@
 import { useCallback, useEffect, useState } from "react";
-import { createConversation, getConversation } from "../api/conversations";
-import type { ConversationDetail, Message } from "../api/conversations";
+import {
+  createConversation,
+  getConversation,
+  listConversations,
+} from "../api/conversations";
+import type { ConversationDetail, ConversationSummary, Message } from "../api/conversations";
 import { sendMessage, streamUrl } from "../api/messages";
 import { useSSEStream } from "../hooks/useSSEStream";
 import { ChatWindow } from "../components/ChatWindow";
 import { EscalationBanner } from "../components/EscalationBanner";
+import { Sidebar } from "../components/Sidebar";
 import "./ChatPage.css";
 
+const LAST_CONVERSATION_KEY = "jev-chat:last-conversation-id";
+
+function rememberConversation(id: number) {
+  try {
+    localStorage.setItem(LAST_CONVERSATION_KEY, String(id));
+  } catch {
+    // localStorage unavailable (private mode, blocked storage) — non-fatal
+  }
+}
+
+function readRememberedConversation(): number | null {
+  try {
+    const raw = localStorage.getItem(LAST_CONVERSATION_KEY);
+    return raw ? Number(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
 export function ChatPage() {
+  const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [conversation, setConversation] = useState<ConversationDetail | null>(null);
   const [streamingUrl, setStreamingUrl] = useState<string | null>(null);
   const [streamingMessageId, setStreamingMessageId] = useState<number | null>(null);
   const [partialContent, setPartialContent] = useState("");
 
-  useEffect(() => {
-    createConversation().then((c) =>
-      setConversation({ id: c.id, status: c.status, messages: [] })
-    );
+  const refreshSidebar = useCallback(async () => {
+    setConversations(await listConversations());
   }, []);
+
+  const selectConversation = useCallback(async (id: number) => {
+    setConversation(await getConversation(id));
+    rememberConversation(id);
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const existing = await listConversations();
+      setConversations(existing);
+
+      const rememberedId = readRememberedConversation();
+      const remembered = rememberedId
+        ? existing.find((c) => c.id === rememberedId)
+        : undefined;
+
+      if (remembered) {
+        await selectConversation(remembered.id);
+      } else if (existing.length > 0) {
+        await selectConversation(existing[0].id);
+      } else {
+        const created = await createConversation();
+        rememberConversation(created.id);
+        setConversation({ id: created.id, status: created.status, messages: [] });
+        await refreshSidebar();
+      }
+    })();
+  }, [refreshSidebar, selectConversation]);
 
   const refreshConversation = useCallback(async () => {
     if (!conversation) return;
@@ -33,6 +84,7 @@ export function ChatPage() {
       setStreamingMessageId(null);
       setPartialContent("");
       refreshConversation();
+      refreshSidebar();
     }
   );
 
@@ -42,6 +94,21 @@ export function ChatPage() {
     await refreshConversation();
     setStreamingMessageId(message_id);
     setStreamingUrl(streamUrl(conversation.id, message_id));
+  };
+
+  const handleNewChat = async () => {
+    const created = await createConversation();
+    rememberConversation(created.id);
+    await refreshSidebar();
+    setConversation({ id: created.id, status: created.status, messages: [] });
+  };
+
+  const handleSelect = async (id: number) => {
+    if (conversation?.id === id) return;
+    setStreamingUrl(null);
+    setStreamingMessageId(null);
+    setPartialContent("");
+    await selectConversation(id);
   };
 
   if (!conversation) {
@@ -56,12 +123,20 @@ export function ChatPage() {
 
   return (
     <div className="chat-page">
-      <EscalationBanner status={conversation.status} />
-      <ChatWindow
-        messages={displayMessages}
-        onSend={handleSend}
-        disabled={conversation.status === "escalated"}
+      <Sidebar
+        conversations={conversations}
+        activeId={conversation.id}
+        onSelect={handleSelect}
+        onNewChat={handleNewChat}
       />
+      <div className="chat-page__main">
+        <EscalationBanner status={conversation.status} />
+        <ChatWindow
+          messages={displayMessages}
+          onSend={handleSend}
+          disabled={conversation.status === "escalated"}
+        />
+      </div>
     </div>
   );
 }
