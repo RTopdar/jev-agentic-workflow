@@ -42,4 +42,5 @@ strict = true
 dev = [
     "aiosqlite>=0.22.1",
     "httpx>=0.28.1",
+    "psycopg2-binary>=2.9.13",
 ]
