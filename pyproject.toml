@@ -5,7 +5,9 @@ description = "TypeSafe/Jev-powered auto-mode middleware for safe, intent-gated 
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "langchain-typesafe>=0.0.1a3",
+    "black>=26.5.1",
+    "langchain-openrouter>=0.2.8",
+    "langchain-typesafe[experimental]>=0.0.1a3",
     "pydantic>=2.13.5",
     "pydantic-settings>=2.15.0",
 ]
