@@ -5,6 +5,7 @@ import { sendMessage, streamUrl } from "../api/messages";
 import { useSSEStream } from "../hooks/useSSEStream";
 import { ChatWindow } from "../components/ChatWindow";
 import { EscalationBanner } from "../components/EscalationBanner";
+import "./ChatPage.css";
 
 export function ChatPage() {
   const [conversation, setConversation] = useState<ConversationDetail | null>(null);
@@ -43,7 +44,9 @@ export function ChatPage() {
     setStreamingUrl(streamUrl(conversation.id, message_id));
   };
 
-  if (!conversation) return <div>Loading...</div>;
+  if (!conversation) {
+    return <div className="chat-page__loading">Starting conversation…</div>;
+  }
 
   const displayMessages: Message[] = streamingMessageId
     ? conversation.messages.map((m) =>

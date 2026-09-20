@@ -25,12 +25,12 @@ export function ChatWindow({ messages, onSend, disabled }: ChatWindowProps) {
           <MessageBubble key={m.id} message={m} />
         ))}
       </div>
-      <form onSubmit={handleSubmit}>
+      <form className="chat-composer" onSubmit={handleSubmit}>
         <input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           disabled={disabled}
-          placeholder="Type a message..."
+          placeholder="Message the team..."
         />
         <button type="submit" disabled={disabled}>
           Send

@@ -1,3 +1,7 @@
 export function AgentBadge({ agentId }: { agentId: number }) {
-  return <span data-testid="agent-badge">Agent #{agentId}</span>;
+  return (
+    <span className="agent-badge" data-testid="agent-badge">
+      Agent #{agentId}
+    </span>
+  );
 }
