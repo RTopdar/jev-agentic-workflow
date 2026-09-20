@@ -111,3 +111,4 @@ Run: `pytest test_middleware.py -v`
 
 - [LangChain TypeSafe Integration](https://www.langchain.com/blog/building-a-harness-with-jev)
 - [TypeSafe System One Architecture](https://docs.typesafe.ai/concepts/system-one.md)
+- [Chat Reply Streaming Seam](/doc/feature/chat-streaming-seam.md) — separate, not-yet-wired Jev integration point in the chat app scaffold

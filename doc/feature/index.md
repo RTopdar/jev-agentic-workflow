@@ -17,6 +17,10 @@ OKF (Open Knowledge Format v0.2) bundle. Each file below is one concept document
 ## Concepts
 
 - [Auto-Mode Middleware](/doc/feature/auto-mode-middleware.md) — middleware.py, orchestrator.py, Jev-powered intent classification and tool access control
+- [Chat App Data Model](/doc/feature/chat-backend-data-model.md) — SQLModel `Agent`/`Conversation`/`Message` tables backing the chat app scaffold
+- [Chat App Backend — Routes, Controllers, Services](/doc/feature/chat-backend-services.md) — FastAPI MVC-ish layering, endpoints, config/session setup
+- [Chat Reply Streaming Seam](/doc/feature/chat-streaming-seam.md) — stub `streaming_service.py` + SSE endpoint, attachment point for the future langgraph + Jev agent layer
+- [Chat Frontend UI](/doc/feature/chat-frontend-ui.md) — React + Vite single-conversation chat UI, SSE consumption
 
 ## Related
 
