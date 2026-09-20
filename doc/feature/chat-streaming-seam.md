@@ -17,11 +17,12 @@ status: stub
 - On completion, the full concatenated content is written back via `message_service.finalize_agent_message`, replacing the empty placeholder content.
 - The controller currently calls `generate_reply("")` — the real conversation content isn't threaded through yet, since the stub ignores its argument anyway.
 
-## Planned Design (per `docs/superpowers/specs/2026-09-21-chat-app-scaffold-design.md`, not yet implemented)
+## Planned Design (not yet implemented)
 
 - **Agent routing**: Jev `Choice`, reading each `Agent.name`/`Agent.description` plus the last 5 messages of the conversation, selects which agent should respond.
 - **Severity / escalation scoring**: Jev `Score` evaluates the conversation/response to set `Message.severity` and `Message.escalated`, and presumably `Conversation.status = "escalated"` (consumed today by the frontend's `EscalationBanner` and input-disable logic, but nothing sets it yet).
 - langgraph is expected to orchestrate the above around the existing SSE token-stream shape, so the endpoint contract (`data:` / `event: done`) should not need to change.
+- **Session/thread management**: `Conversation.id` doubles as langgraph's `thread_id` (no separate UUID field). Postgres `Message` rows remain the source of truth for display history; langgraph's checkpointer owns graph-execution state/memory, keyed by that same id.
 
 ## Design Notes
 

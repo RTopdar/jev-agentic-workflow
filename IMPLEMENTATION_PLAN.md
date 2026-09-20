@@ -7,7 +7,7 @@ Narrative architecture and open decisions for this project. Kept in sync with th
 Alpha — two tracks in the repo:
 
 - **Auto-mode middleware** (root-level `middleware.py`/`orchestrator.py`) — functional, intent-gated multi-step tool execution, full test suite.
-- **Chat app scaffold** (`backend/`, `frontend/`) — full FastAPI + SQLModel + Postgres backend and React + Vite + SSE frontend are scaffolded and tested end-to-end, but the AI layer (agent routing, severity/escalation scoring) is a stub. `streaming_service.py` yields canned tokens; the langgraph + Jev integration described in `docs/superpowers/specs/2026-09-21-chat-app-scaffold-design.md` is not implemented yet.
+- **Chat app scaffold** (`backend/`, `frontend/`) — full FastAPI + SQLModel + Postgres backend and React + Vite + SSE frontend are scaffolded and tested end-to-end, but the AI layer (agent routing, severity/escalation scoring) is a stub. `streaming_service.py` yields canned tokens; the langgraph + Jev integration is not implemented yet.
 
 ## Dependencies
 
@@ -81,8 +81,9 @@ Endpoints exposed: `POST/GET /agents`, `POST /conversations`, `GET /conversation
 - Confidence threshold (60%) — tunable per gate or global? *(auto-mode middleware)*
 - Escalation path for blocked requests — log only, or route to human review? *(auto-mode middleware)*
 - Intent cache — should repeated identical requests reuse classification? *(auto-mode middleware)*
-- Agent routing and severity/escalation scoring for chat messages — designed (Jev `Choice` and `Score`, per the linked spec) but not implemented; `streaming_service.py` remains a stub until this lands.
+- Agent routing and severity/escalation scoring for chat messages — designed (Jev `Choice` and `Score`) but not implemented; `streaming_service.py` remains a stub until this lands.
 - Multi-conversation support / auth for the chat frontend — explicitly out of scope for this scaffold; revisit if the app moves past single-user demo use.
+- Langgraph thread/session management — reuse `Conversation.id` directly as langgraph's `thread_id` (no separate UUID field). Postgres (`Message` rows) stays the source of truth for display history; langgraph's checkpointer owns graph-execution state/memory keyed by that same id.
 
 ## Changelog
 
